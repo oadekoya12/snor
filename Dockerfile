@@ -21,22 +21,19 @@ FROM centos:8
 #     chown -R sonar:sonar /opt/sonarqube/ &&\
 #     chmod -R 777 /opt/sonarqube/data/ /opt/sonarqube/extensions/ /opt/sonarqube/logs/ /opt/sonarqube/temp/
 
-
+# USER postgres
+# RUN sh /local/psql.sh
+# USER root
 
 
 #### Uncomment below if you want to use localhost for postgres
 ### Install PostgresSQL
+COPY ./local/ /local
 RUN yum -y install postgresql-server postgresql postgresql-contrib dos2unix unzip java-11-openjdk &&\
-    mkdir -p /usr/local/psql/data /var/log/psql /root/dowload && chown -R postgres:postgres /usr/local/psql /var/log/psql
-# ADD ./vol/data /usr/local/psql/data
-ADD ./local/psql.sh /psql.sh
-RUN chown -R postgres:postgres /var/log/psql/ /usr/local/psql/data && chmod 700 /usr/local/psql/data 
-RUN dos2unix /psql.sh
-USER postgres
-RUN sh /psql.sh
-USER root
-
-RUN groupadd sonar; adduser -g sonar sonar; \
+    mkdir -p /usr/local/psql/data /var/log/psql /root/dowload && chown -R postgres:postgres /usr/local/psql /var/log/psql &&\
+    chown -R postgres:postgres /var/log/psql/ /usr/local/psql/data && chmod 700 /usr/local/psql/data && dos2unix /local/psql.sh &&\
+    su postgres -c 'sh /local/psql.sh' &&\
+    groupadd sonar; adduser -g sonar sonar; \
     curl https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.0.1.46107.zip --output /root/dowload/sonarqube-9.0.1.46107.zip &&\
     unzip /root/dowload/sonarqube-9.0.1.46107.zip -d /opt &&\
     mv /opt/sonarqube-9.0.1.46107 /opt/sonarqube &&\
@@ -54,9 +51,7 @@ RUN groupadd sonar; adduser -g sonar sonar; \
 
 ### OR
 #### Uncomment below if you want to use AWS RDS for postgres 
-
-COPY ./local/script.sh /script.sh
-RUN dos2unix /script.sh
+# RUN dos2unix /local/script.sh
 
 EXPOSE 9000
-ENTRYPOINT  ["sh","/script.sh"]
+ENTRYPOINT  ["sh","/local/script.sh"]
