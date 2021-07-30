@@ -15,7 +15,7 @@ RUN yum update -y &&\
     echo "sonar.jdbc.url=jdbc:postgresql://sonar.c35yhw7wfnyz.us-east-1.rds.amazonaws.com:5432/sonar" >> /opt/sonarqube/conf/sonar.properties &&\
     echo "sonar.web.javaOpts=-Xmx1024m -XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError" >> /opt/sonarqube/conf/sonar.properties &&\
     echo "sonar.web.host=0.0.0.0" >> /opt/sonarqube/conf/sonar.properties &&\
-    echo "sonar.web.port=9000" >> opt/sonarqube/conf/sonar.properties &&\
+    echo "sonar.web.port=9010" >> opt/sonarqube/conf/sonar.properties &&\
     echo "sonar.path.logs=logs" >> /opt/sonarqube/conf/sonar.properties &&\
     echo "sonar.path.data=data" >> /opt/sonarqube/conf/sonar.properties &&\
     chown -R sonar:sonar /opt/sonarqube/ &&\
@@ -69,5 +69,5 @@ RUN yum update -y &&\
 COPY ./local/script.sh /script.sh
 RUN dos2unix /script.sh
 
-EXPOSE 9000
+EXPOSE 9010
 ENTRYPOINT  ["sh","/script.sh"]
