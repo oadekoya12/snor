@@ -1,4 +1,5 @@
-FROM centos:8
+# FROM centos:8
+FROM 908883891338.dkr.ecr.us-east-1.amazonaws.com/ecasdas_sonar
 
 # RUN yum update -y &&\
 #     yum install -y langpacks-en glibc-all-langpacks bind-utils &&\
