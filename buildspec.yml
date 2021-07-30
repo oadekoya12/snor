@@ -1,0 +1,52 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+    commands:
+      - mkdir -p ~/tmp && cd ~/tmp && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      - cd ~/tmp && unzip awscliv2.zip && ./aws/install --update && cd  .. && rm -rf ~/tmp
+      - yum install -y yum-utils
+      - yum-config-manager  --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+      - yum install -y docker-ce docker-ce-cli containerd.io
+      - yum install -y git
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 908883891338.dkr.ecr.us-east-1.amazonaws.com 
+      - REPOSITORY_URI=908883891338.dkr.ecr.us-east-1.amazonaws.com/ecasdas_sonar
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - echo $REPOSITORY_URI && echo $IMAGE_TAG && echo $PWD
+      - dockerd &> /var/log/dockerd-logfile &
+      - ps -aux | grep docker
+      - git config --global credential.helper store
+      - git clone https://oadekoya12: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@github.com/oadekoya12/snor.git ecasdas_sonar
+      - cd ecasdas_sonar
+      - sh shellenv.sh
+      - echo $REPOSITORY_URI && echo $IMAGE_TAG
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+
+      # Build Artifact
+      - yum install jq -y && ContainerName="ECASDAS-Sonar-container" && ImageURI="$REPOSITORY_URI:latest" && printf '[{"name":"CONTAINER_NAME","imageUri":"IMAGE_URI"}]' > imagedefinitions.json && sed -i -e "s|CONTAINER_NAME|$ContainerName|g" imagedefinitions.json &&  sed -i -e "s|IMAGE_URI|$ImageURI|g" imagedefinitions.json && 
+      - cat imagedefinitions.json && ls -al && echo $PWD && cat src/public/index.php
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - ls -al
+artifacts:
+  files:
+  # - imagedefinitions.json
+    - '**/*'
+  name: base_configuration_container
+  ##
