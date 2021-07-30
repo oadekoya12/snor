@@ -3,7 +3,9 @@ FROM 908883891338.dkr.ecr.us-east-1.amazonaws.com/ecasdas_sonar
 EXPOSE 9000
 ENTRYPOINT  ["sh","/local/script.sh"]
 
+#### ------------------- OR ------------------- 
 ## For Built
+
 # FROM centos:8
 # # RUN yum update -y &&\
 # #     yum install -y langpacks-en glibc-all-langpacks bind-utils &&\
