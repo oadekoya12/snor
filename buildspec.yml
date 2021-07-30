@@ -29,7 +29,6 @@ phases:
       - git config --global credential.helper store
       - git clone https://oadekoya12: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@github.com/oadekoya12/snor.git ecasdas_sonar
       - cd ecasdas_sonar
-      - sh shellenv.sh
       - echo $REPOSITORY_URI && echo $IMAGE_TAG
       - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
